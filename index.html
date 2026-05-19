@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head><title>Car Tracker</title></head>
+<body>
+    <h1 id="title">Моніторинг ТО</h1>
+    <input type="number" id="mileage" placeholder="Поточний пробіг">
+    <button id="check-btn">Перевірити</button>
+    <div id="result"></div>
+    <script>
+        document.getElementById('check-btn').addEventListener('click', () => {
+            const val = document.getElementById('mileage').value;
+            const diff = Number(val) - 140000;
+            document.getElementById('result').innerText = diff >= 10000 ? "Час замінити масло" : "Масло ще в нормі";
+        });
+    </script>
+</body>
+</html>

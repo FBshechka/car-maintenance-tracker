@@ -1,0 +1,16 @@
+{
+  "name": "car-maintenance-tracker",
+  "type": "module",
+  "scripts": {
+    "test:unit": "vitest run tests",
+    "test:coverage": "vitest run tests --coverage",
+    "test:e2e": "playwright test e2e",
+    "test": "npm run test:unit && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.41.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "vitest": "^1.2.0"
+  }
+}
+// оновлення для гітхаба

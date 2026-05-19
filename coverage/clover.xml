@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1779181209706" clover="3.2.0">
+  <project timestamp="1779181209706" name="All files">
+    <metrics statements="5" coveredstatements="5" conditionals="6" coveredconditionals="6" methods="2" coveredmethods="2" elements="13" coveredelements="13" complexity="0" loc="5" ncloc="5" packages="1" files="1" classes="1"/>
+    <file name="tracker.js" path="/Users/maximovi444/car-maintenance-tracker/src/tracker.js">
+      <metrics statements="5" coveredstatements="5" conditionals="6" coveredconditionals="6" methods="2" coveredmethods="2"/>
+      <line num="2" count="3" type="cond" truecount="2" falsecount="0"/>
+      <line num="3" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="4" count="1" type="stmt"/>
+      <line num="8" count="2" type="cond" truecount="2" falsecount="0"/>
+      <line num="9" count="1" type="stmt"/>
+    </file>
+  </project>
+</coverage>
