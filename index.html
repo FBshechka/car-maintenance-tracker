@@ -14,35 +14,38 @@
 </head>
 <body class="bg-gray-100 p-8">
     <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
-        <input id="task" class="w-full border p-2 mb-2" placeholder="Завдання">
-        <input id="mile" class="w-full border p-2 mb-2" placeholder="Пробіг">
-        <button onclick="addRecord()" class="w-full bg-blue-500 text-white p-2">Додати</button>
+        <h2 class="text-xl font-bold mb-4">AutoService Pro</h2>
+        <input id="task" class="w-full border p-2 mb-2 rounded" placeholder="Завдання">
+        <input id="mile" class="w-full border p-2 mb-2 rounded" placeholder="Пробіг (км)">
+        <button id="btn" class="w-full bg-blue-500 text-white p-2 rounded">Додати</button>
         <div id="list" class="mt-4"></div>
     </div>
 
     <script>
-        function addRecord() {
+        document.getElementById('btn').addEventListener('click', function() {
             const task = document.getElementById('task').value;
             const mile = document.getElementById('mile').value;
 
+            // 1. Перевірка на помилку (для Sentry)
             if (!task || !mile) {
-                // Помилка для Sentry
-                const err = new Error("Поля порожні");
-                Sentry.captureException(err);
-                alert("Заповніть поля!");
+                Sentry.captureException(new Error("Поля порожні!"));
+                alert("Заповніть всі поля!");
                 return;
             }
 
-            // Успіх для PostHog
+            // 2. Аналітика успіху (для PostHog)
             posthog.capture('record_added', { task: task, mileage: mile });
 
-            // Відображення на сайті
-            document.getElementById('list').innerHTML += `<div class="p-2 border-b">${task} (${mile} км)</div>`;
-            
+            // 3. Додавання в список
+            const div = document.createElement('div');
+            div.className = "p-2 border-b";
+            div.textContent = `${task} — ${mile} км`;
+            document.getElementById('list').appendChild(div);
+
             // Очистка
             document.getElementById('task').value = '';
             document.getElementById('mile').value = '';
-        }
+        });
     </script>
 </body>
 </html>
