@@ -40,16 +40,24 @@
     </main>
 
     <script>
+        // Вшиваємо ідентифікацію користувача для Sentry
+        if (window.Sentry) {
+            Sentry.setUser({ id: "student_45114163", email: "user@example.com" });
+        }
+
         document.getElementById('btn').addEventListener('click', function() {
             const task = document.getElementById('task').value;
             const mile = document.getElementById('mile').value;
 
+            // 1. Помилка для Sentry
             if (!task || !mile) {
-                Sentry.captureException(new Error("Спроба додати порожній запис"));
+                const err = new Error("Спроба додати порожній запис");
+                if (window.Sentry) Sentry.captureException(err);
                 alert("Будь ласка, заповніть всі поля!");
                 return;
             }
 
+            // 2. Аналітика для PostHog
             posthog.capture('record_added', { task: task, mileage: mile });
 
             const list = document.getElementById('list');
@@ -61,15 +69,14 @@
             document.getElementById('task').value = '';
             document.getElementById('mile').value = '';
         });
-        // Це спрацює при завантаженні сторінки
-setTimeout(() => {
-    try {
-        throw new Error("Тестова помилка: Sentry працює!");
-    } catch (e) {
-        Sentry.captureException(e);
-        console.log("Помилка відправлена в Sentry");
-    }
-}, 2000); // через 2 секунди після завантаження
+
+        // 3. Автоматичний тригер для перевірки Sentry
+        setTimeout(() => {
+            if (window.Sentry) {
+                console.log("Sentry ініціалізовано, надсилаю тестовий сигнал...");
+                Sentry.captureMessage("Sentry успішно підключено та працює!");
+            }
+        }, 3000);
     </script>
 </body>
 </html>
