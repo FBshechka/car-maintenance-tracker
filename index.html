@@ -11,10 +11,11 @@
     <div class="max-w-md mx-auto py-10 px-4">
         <header class="mb-8 text-center">
             <h1 class="text-3xl font-extrabold text-gray-900">AutoService Pro</h1>
+            <p class="text-gray-500">Ваш персональний трекер</p>
         </header>
 
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
-            <input type="text" id="taskInput" placeholder="Що зробили?" class="w-full p-3 mb-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+            <input type="text" id="taskInput" placeholder="Наприклад: Заміна мастила" class="w-full p-3 mb-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
             <input type="number" id="mileageInput" placeholder="Пробіг (км)" class="w-full p-3 mb-4 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
             <button onclick="addRecord()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">
                 Додати запис
@@ -26,10 +27,17 @@
     </div>
 
     <script>
+        // Завантажуємо дані з пам'яті браузера при відкритті сторінки
+        window.onload = function() {
+            const saved = localStorage.getItem('myCarRecords');
+            if(saved) document.getElementById('recordList').innerHTML = saved;
+        };
+
+        // Функція додавання запису
         function addRecord() {
             const task = document.getElementById('taskInput').value;
             const mileage = document.getElementById('mileageInput').value;
-            if(!task || !mileage) return;
+            if(!task || !mileage) return alert("Будь ласка, заповніть всі поля");
 
             const list = document.getElementById('recordList');
             const div = document.createElement('div');
@@ -39,12 +47,24 @@
                     <p class="font-semibold text-gray-800">${task}</p>
                     <p class="text-xs text-gray-500">${mileage} км</p>
                 </div>
-                <button onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600">Видалити</button>
+                <button onclick="removeAndSave(this)" class="text-red-400 hover:text-red-600 text-sm">Видалити</button>
             `;
             list.appendChild(div);
             
+            saveData(); // Одразу зберігаємо
             document.getElementById('taskInput').value = '';
             document.getElementById('mileageInput').value = '';
+        }
+
+        // Функція видалення
+        function removeAndSave(btn) {
+            btn.parentElement.remove();
+            saveData();
+        }
+
+        // Функція збереження в пам'ять браузера
+        function saveData() {
+            localStorage.setItem('myCarRecords', document.getElementById('recordList').innerHTML);
         }
     </script>
 </body>
