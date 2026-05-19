@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Car Maintenance Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".js","")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_util_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify启用子域".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+        
+        posthog.init('phc_AoCGeuiW9ByfSkhvyntgKayRN83oU5tFvanEkVpGzN4z', { api_host: 'https://us.posthog.com' })
+    </script>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">
 
     <div class="max-w-md mx-auto py-10 px-4">
         <header class="mb-8 text-center">
             <h1 class="text-3xl font-extrabold text-gray-900">AutoService Pro</h1>
-            <p class="text-gray-500">Ваш персональний трекер</p>
         </header>
 
         <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
@@ -22,22 +27,22 @@
             </button>
         </div>
 
-        <div id="recordList" class="space-y-4">
-            </div>
+        <div id="recordList" class="space-y-4"></div>
     </div>
 
     <script>
-        // Завантажуємо дані з пам'яті браузера при відкритті сторінки
         window.onload = function() {
             const saved = localStorage.getItem('myCarRecords');
             if(saved) document.getElementById('recordList').innerHTML = saved;
         };
 
-        // Функція додавання запису
         function addRecord() {
             const task = document.getElementById('taskInput').value;
             const mileage = document.getElementById('mileageInput').value;
-            if(!task || !mileage) return alert("Будь ласка, заповніть всі поля");
+            if(!task || !mileage) return alert("Заповніть поля");
+
+            // Фіксація події в PostHog
+            posthog.capture('record_added', { task: task, mileage: mileage });
 
             const list = document.getElementById('recordList');
             const div = document.createElement('div');
@@ -50,19 +55,16 @@
                 <button onclick="removeAndSave(this)" class="text-red-400 hover:text-red-600 text-sm">Видалити</button>
             `;
             list.appendChild(div);
-            
-            saveData(); // Одразу зберігаємо
+            saveData();
             document.getElementById('taskInput').value = '';
             document.getElementById('mileageInput').value = '';
         }
 
-        // Функція видалення
         function removeAndSave(btn) {
             btn.parentElement.remove();
             saveData();
         }
 
-        // Функція збереження в пам'ять браузера
         function saveData() {
             localStorage.setItem('myCarRecords', document.getElementById('recordList').innerHTML);
         }
