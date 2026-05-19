@@ -2,70 +2,61 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Maintenance Tracker</title>
+    <title>AutoService Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".js","")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_util_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify启用子域".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+        posthog.init('phx_Jm5BAsy56K3wHBzp4uXoshSQVCufffhBVjt8NScW35jqJbo3', { api_host: 'https://us.posthog.com' })
+    </script>
+
+    <script src="https://js.sentry-cdn.com/0a62e48e45194e0cd135a84cd7161226.min.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-    <div class="max-w-md mx-auto py-10 px-4">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-extrabold text-gray-900">AutoService Pro</h1>
-            <p class="text-gray-500">Ваш персональний трекер</p>
-        </header>
-
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
-            <input type="text" id="taskInput" placeholder="Наприклад: Заміна мастила" class="w-full p-3 mb-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-            <input type="number" id="mileageInput" placeholder="Пробіг (км)" class="w-full p-3 mb-4 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-            <button onclick="addRecord()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">
-                Додати запис
-            </button>
-        </div>
-
-        <div id="recordList" class="space-y-4">
-            </div>
+    <div class="w-full max-w-sm bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">AutoService Pro</h1>
+        <p class="text-gray-500 text-sm mb-6">Локальна перевірка</p>
+        
+        <input id="task" class="w-full p-3 mb-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-400" placeholder="Назва роботи">
+        <input id="mile" type="number" class="w-full p-3 mb-4 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-400" placeholder="Пробіг (км)">
+        
+        <button id="btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition">Додати запис</button>
+        
+        <div id="list" class="mt-6 space-y-2"></div>
     </div>
 
     <script>
-        // Завантажуємо дані з пам'яті браузера при відкритті сторінки
-        window.onload = function() {
-            const saved = localStorage.getItem('myCarRecords');
-            if(saved) document.getElementById('recordList').innerHTML = saved;
-        };
+        document.getElementById('btn').addEventListener('click', function() {
+            try {
+                const task = document.getElementById('task').value;
+                const mile = document.getElementById('mile').value;
 
-        // Функція додавання запису
-        function addRecord() {
-            const task = document.getElementById('taskInput').value;
-            const mileage = document.getElementById('mileageInput').value;
-            if(!task || !mileage) return alert("Будь ласка, заповніть всі поля");
+                // 1. БЕЗПЕЧНА ЛОГІКА
+                if (!task || !mile) {
+                    console.warn("Порожні поля, тригеримо Sentry...");
+                    if (window.Sentry) Sentry.captureException(new Error("Порожні поля!"));
+                    alert("Заповніть всі поля!");
+                    return;
+                }
 
-            const list = document.getElementById('recordList');
-            const div = document.createElement('div');
-            div.className = "flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100";
-            div.innerHTML = `
-                <div>
-                    <p class="font-semibold text-gray-800">${task}</p>
-                    <p class="text-xs text-gray-500">${mileage} км</p>
-                </div>
-                <button onclick="removeAndSave(this)" class="text-red-400 hover:text-red-600 text-sm">Видалити</button>
-            `;
-            list.appendChild(div);
-            
-            saveData(); // Одразу зберігаємо
-            document.getElementById('taskInput').value = '';
-            document.getElementById('mileageInput').value = '';
-        }
+                // 2. Аналітика
+                if (window.posthog) {
+                    posthog.capture('record_added', { task, mile });
+                    console.log("PostHog: Event sent");
+                }
 
-        // Функція видалення
-        function removeAndSave(btn) {
-            btn.parentElement.remove();
-            saveData();
-        }
+                // 3. Відображення (завжди працює)
+                const list = document.getElementById('list');
+                list.innerHTML += `<div class="p-3 bg-gray-50 rounded-lg border text-sm">${task} — ${mile} км</div>`;
+                
+                document.getElementById('task').value = '';
+                document.getElementById('mile').value = '';
 
-        // Функція збереження в пам'ять браузера
-        function saveData() {
-            localStorage.setItem('myCarRecords', document.getElementById('recordList').innerHTML);
-        }
+            } catch (err) {
+                console.error("Помилка в коді:", err);
+            }
+        });
     </script>
 </body>
 </html>
