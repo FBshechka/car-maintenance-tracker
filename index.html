@@ -61,6 +61,15 @@
             document.getElementById('task').value = '';
             document.getElementById('mile').value = '';
         });
+        // Це спрацює при завантаженні сторінки
+setTimeout(() => {
+    try {
+        throw new Error("Тестова помилка: Sentry працює!");
+    } catch (e) {
+        Sentry.captureException(e);
+        console.log("Помилка відправлена в Sentry");
+    }
+}, 2000); // через 2 секунди після завантаження
     </script>
 </body>
 </html>
