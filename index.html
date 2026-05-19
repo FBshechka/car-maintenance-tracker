@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoService Pro | Maintenance Tracker</title>
+    <title>AutoService Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
@@ -13,70 +13,47 @@
 
     <script src="https://js.sentry-cdn.com/0a62e48e45194e0cd135a84cd7161226.min.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-slate-50 min-h-screen">
-    <main class="max-w-xl mx-auto pt-16 px-6">
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-black text-slate-900 mb-2">AutoService Pro</h1>
-            <p class="text-slate-500">Система обліку технічного обслуговування</p>
-        </div>
-
-        <div class="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100">
-            <div class="mb-5">
-                <label class="block text-sm font-bold text-slate-700 mb-2">Назва роботи</label>
-                <input id="task" type="text" placeholder="Наприклад: Заміна масла" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-100 outline-none transition">
-            </div>
-            <div class="mb-6">
-                <label class="block text-sm font-bold text-slate-700 mb-2">Пробіг (км)</label>
-                <input id="mile" type="number" placeholder="Введіть значення" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-100 outline-none transition">
-            </div>
-            <button id="btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition active:scale-95">
-                Додати запис
-            </button>
-        </div>
-
-        <div id="list" class="mt-8 space-y-3 pb-20">
-            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Історія обслуговування</h3>
-        </div>
-    </main>
+<body class="bg-slate-50 p-8">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
+        <h1 class="text-xl font-bold mb-4">AutoService Pro</h1>
+        <input id="task" class="w-full border p-2 mb-2 rounded" placeholder="Завдання">
+        <input id="mile" class="w-full border p-2 mb-2 rounded" placeholder="Пробіг">
+        <button id="btn" class="w-full bg-blue-600 text-white p-2 rounded">Додати</button>
+        <div id="list" class="mt-4"></div>
+    </div>
 
     <script>
-        // Вшиваємо ідентифікацію користувача для Sentry
-        if (window.Sentry) {
-            Sentry.setUser({ id: "student_45114163", email: "user@example.com" });
-        }
-
         document.getElementById('btn').addEventListener('click', function() {
             const task = document.getElementById('task').value;
             const mile = document.getElementById('mile').value;
 
-            // 1. Помилка для Sentry
+            // 1. БЕЗПЕЧНА перевірка помилки (Sentry)
             if (!task || !mile) {
-                const err = new Error("Спроба додати порожній запис");
-                if (window.Sentry) Sentry.captureException(err);
-                alert("Будь ласка, заповніть всі поля!");
+                console.warn("Поля порожні, відправляю в Sentry...");
+                if (typeof Sentry !== 'undefined') {
+                    Sentry.captureException(new Error("Поля порожні!"));
+                } else {
+                    console.error("Sentry не завантажився (можливо AdBlock)");
+                }
+                alert("Заповніть поля!");
                 return;
             }
 
-            // 2. Аналітика для PostHog
-            posthog.capture('record_added', { task: task, mileage: mile });
+            // 2. БЕЗПЕЧНА відправка в PostHog
+            if (typeof posthog !== 'undefined') {
+                posthog.capture('record_added', { task: task, mileage: mile });
+                console.log("Дані відправлено в PostHog");
+            } else {
+                console.error("PostHog не завантажився");
+            }
 
+            // 3. Відображення на сайті (працює завжди)
             const list = document.getElementById('list');
-            const item = document.createElement('div');
-            item.className = "bg-white p-4 rounded-2xl border border-slate-100 flex justify-between items-center shadow-sm";
-            item.innerHTML = `<div><p class="font-bold text-slate-800">${task}</p><p class="text-xs text-slate-400">${mile} км</p></div><span class="text-blue-500 text-xs font-bold bg-blue-50 px-3 py-1 rounded-full">Збережено</span>`;
+            list.innerHTML += `<div class="p-2 border-b">${task} (${mile} км)</div>`;
             
-            list.appendChild(item);
             document.getElementById('task').value = '';
             document.getElementById('mile').value = '';
         });
-
-        // 3. Автоматичний тригер для перевірки Sentry
-        setTimeout(() => {
-            if (window.Sentry) {
-                console.log("Sentry ініціалізовано, надсилаю тестовий сигнал...");
-                Sentry.captureMessage("Sentry успішно підключено та працює!");
-            }
-        }, 3000);
     </script>
 </body>
 </html>
