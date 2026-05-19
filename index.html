@@ -2,8 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Maintenance Tracker</title>
+    <title>Car Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
@@ -13,41 +12,36 @@
 
     <script src="https://js.sentry-cdn.com/0a62e48e45194e0cd135a84cd7161226.min.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans">
-    <div class="max-w-md mx-auto py-10 px-4">
-        <h1 class="text-3xl font-extrabold text-center mb-8">AutoService Pro</h1>
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border">
-            <input type="text" id="taskInput" placeholder="Заміна мастила" class="w-full p-3 mb-3 border rounded-xl">
-            <input type="number" id="mileageInput" placeholder="Пробіг (км)" class="w-full p-3 mb-4 border rounded-xl">
-            <button onclick="addRecord()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">Додати запис</button>
-        </div>
-        <div id="recordList" class="space-y-4"></div>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
+        <input id="task" class="w-full border p-2 mb-2" placeholder="Завдання">
+        <input id="mile" class="w-full border p-2 mb-2" placeholder="Пробіг">
+        <button onclick="addRecord()" class="w-full bg-blue-500 text-white p-2">Додати</button>
+        <div id="list" class="mt-4"></div>
     </div>
 
     <script>
         function addRecord() {
-            // Контекст для Sentry
-            Sentry.setUser({ id: "student_user_1", email: "student@university.edu" });
+            const task = document.getElementById('task').value;
+            const mile = document.getElementById('mile').value;
 
-            const task = document.getElementById('taskInput').value;
-            const mileage = document.getElementById('mileageInput').value;
-            
-            // PostHog Event
-            posthog.capture('record_added', { task: task, mileage: mileage });
-
-            // Sentry Error Trigger
-            if (!task || !mileage) {
-                try {
-                    throw new Error("Тестова помилка: порожні поля");
-                } catch (err) {
-                    Sentry.captureException(err);
-                    alert("Заповніть поля!");
-                    return;
-                }
+            if (!task || !mile) {
+                // Помилка для Sentry
+                const err = new Error("Поля порожні");
+                Sentry.captureException(err);
+                alert("Заповніть поля!");
+                return;
             }
 
-            const list = document.getElementById('recordList');
-            list.innerHTML += `<div class="p-4 bg-white rounded-xl border">${task} - ${mileage} км</div>`;
+            // Успіх для PostHog
+            posthog.capture('record_added', { task: task, mileage: mile });
+
+            // Відображення на сайті
+            document.getElementById('list').innerHTML += `<div class="p-2 border-b">${task} (${mile} км)</div>`;
+            
+            // Очистка
+            document.getElementById('task').value = '';
+            document.getElementById('mile').value = '';
         }
     </script>
 </body>
