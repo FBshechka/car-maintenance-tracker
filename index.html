@@ -12,50 +12,43 @@
 
     <script src="https://js.sentry-cdn.com/0a62e48e45194e0cd135a84cd7161226.min.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
-    <div class="w-full max-w-sm bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-        <h1 class="text-2xl font-bold text-gray-800 mb-1">AutoService Pro</h1>
-        <p class="text-gray-500 text-sm mb-6">Локальна перевірка</p>
-        
-        <input id="task" class="w-full p-3 mb-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-400" placeholder="Назва роботи">
-        <input id="mile" type="number" class="w-full p-3 mb-4 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-400" placeholder="Пробіг (км)">
-        
-        <button id="btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition">Додати запис</button>
-        
-        <div id="list" class="mt-6 space-y-2"></div>
+<body class="bg-slate-50 p-6">
+    <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-sm border">
+        <h1 class="text-xl font-bold mb-4">AutoService Pro</h1>
+        <input id="task" class="w-full border p-2 mb-2 rounded" placeholder="Завдання">
+        <input id="mile" class="w-full border p-2 mb-2 rounded" placeholder="Пробіг">
+        <button id="btn" class="w-full bg-blue-600 text-white py-2 rounded font-bold">Додати запис</button>
+        <div id="list" class="mt-4"></div>
     </div>
 
     <script>
         document.getElementById('btn').addEventListener('click', function() {
-            try {
-                const task = document.getElementById('task').value;
-                const mile = document.getElementById('mile').value;
+            const task = document.getElementById('task').value;
+            const mile = document.getElementById('mile').value;
 
-                // 1. БЕЗПЕЧНА ЛОГІКА
-                if (!task || !mile) {
-                    console.warn("Порожні поля, тригеримо Sentry...");
-                    if (window.Sentry) Sentry.captureException(new Error("Порожні поля!"));
-                    alert("Заповніть всі поля!");
-                    return;
+            // 1. ПЕРЕВІРКА ПОМИЛКИ (Sentry)
+            if (!task || !mile) {
+                if (window.Sentry) {
+                    Sentry.captureException(new Error("Порожні поля"));
+                } else {
+                    console.error("Sentry заблоковано!");
                 }
-
-                // 2. Аналітика
-                if (window.posthog) {
-                    posthog.capture('record_added', { task, mile });
-                    console.log("PostHog: Event sent");
-                }
-
-                // 3. Відображення (завжди працює)
-                const list = document.getElementById('list');
-                list.innerHTML += `<div class="p-3 bg-gray-50 rounded-lg border text-sm">${task} — ${mile} км</div>`;
-                
-                document.getElementById('task').value = '';
-                document.getElementById('mile').value = '';
-
-            } catch (err) {
-                console.error("Помилка в коді:", err);
+                alert("Заповніть поля!");
+                return;
             }
+
+            // 2. АНАЛІТИКА (PostHog)
+            if (window.posthog) {
+                posthog.capture('record_added', { task, mile });
+                console.log("PostHog відправив подію");
+            } else {
+                console.error("PostHog заблоковано!");
+            }
+
+            // 3. UI
+            document.getElementById('list').innerHTML += `<div class="p-2 border-b">${task}</div>`;
+            document.getElementById('task').value = '';
+            document.getElementById('mile').value = '';
         });
     </script>
 </body>
