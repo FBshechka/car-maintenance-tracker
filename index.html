@@ -26,26 +26,16 @@
             const task = document.getElementById('task').value;
             const mile = document.getElementById('mile').value;
 
-            // 1. ПЕРЕВІРКА ПОМИЛКИ (Sentry)
             if (!task || !mile) {
-                if (window.Sentry) {
-                    Sentry.captureException(new Error("Порожні поля"));
-                } else {
-                    console.error("Sentry заблоковано!");
-                }
+                if (window.Sentry) Sentry.captureException(new Error("Порожні поля"));
                 alert("Заповніть поля!");
                 return;
             }
 
-            // 2. АНАЛІТИКА (PostHog)
             if (window.posthog) {
                 posthog.capture('record_added', { task, mile });
-                console.log("PostHog відправив подію");
-            } else {
-                console.error("PostHog заблоковано!");
             }
 
-            // 3. UI
             document.getElementById('list').innerHTML += `<div class="p-2 border-b">${task}</div>`;
             document.getElementById('task').value = '';
             document.getElementById('mile').value = '';
