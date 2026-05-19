@@ -8,65 +8,46 @@
 
     <script>
         !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".js","")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_util_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify启用子域".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-        
         posthog.init('phx_Jm5BAsy56K3wHBzp4uXoshSQVCufffhBVjt8NScW35jqJbo3', { api_host: 'https://us.posthog.com' })
     </script>
+
+    <script src="https://js.sentry-cdn.com/0a62e48e45194e0cd135a84cd7161226.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">
-
     <div class="max-w-md mx-auto py-10 px-4">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-extrabold text-gray-900">AutoService Pro</h1>
-        </header>
-
-        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-100">
-            <input type="text" id="taskInput" placeholder="Наприклад: Заміна мастила" class="w-full p-3 mb-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-            <input type="number" id="mileageInput" placeholder="Пробіг (км)" class="w-full p-3 mb-4 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-            <button onclick="addRecord()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">
-                Додати запис
-            </button>
+        <h1 class="text-3xl font-extrabold text-center mb-8">AutoService Pro</h1>
+        <div class="bg-white rounded-2xl shadow-sm p-6 mb-6 border">
+            <input type="text" id="taskInput" placeholder="Заміна мастила" class="w-full p-3 mb-3 border rounded-xl">
+            <input type="number" id="mileageInput" placeholder="Пробіг (км)" class="w-full p-3 mb-4 border rounded-xl">
+            <button onclick="addRecord()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl">Додати запис</button>
         </div>
-
         <div id="recordList" class="space-y-4"></div>
     </div>
 
     <script>
-        window.onload = function() {
-            const saved = localStorage.getItem('myCarRecords');
-            if(saved) document.getElementById('recordList').innerHTML = saved;
-        };
-
         function addRecord() {
+            // Контекст для Sentry
+            Sentry.setUser({ id: "student_user_1", email: "student@university.edu" });
+
             const task = document.getElementById('taskInput').value;
             const mileage = document.getElementById('mileageInput').value;
-            if(!task || !mileage) return alert("Заповніть поля");
-
-            // Фіксація події в PostHog
+            
+            // PostHog Event
             posthog.capture('record_added', { task: task, mileage: mileage });
 
+            // Sentry Error Trigger
+            if (!task || !mileage) {
+                try {
+                    throw new Error("Тестова помилка: порожні поля");
+                } catch (err) {
+                    Sentry.captureException(err);
+                    alert("Заповніть поля!");
+                    return;
+                }
+            }
+
             const list = document.getElementById('recordList');
-            const div = document.createElement('div');
-            div.className = "flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100";
-            div.innerHTML = `
-                <div>
-                    <p class="font-semibold text-gray-800">${task}</p>
-                    <p class="text-xs text-gray-500">${mileage} км</p>
-                </div>
-                <button onclick="removeAndSave(this)" class="text-red-400 hover:text-red-600 text-sm">Видалити</button>
-            `;
-            list.appendChild(div);
-            saveData();
-            document.getElementById('taskInput').value = '';
-            document.getElementById('mileageInput').value = '';
-        }
-
-        function removeAndSave(btn) {
-            btn.parentElement.remove();
-            saveData();
-        }
-
-        function saveData() {
-            localStorage.setItem('myCarRecords', document.getElementById('recordList').innerHTML);
+            list.innerHTML += `<div class="p-4 bg-white rounded-xl border">${task} - ${mileage} км</div>`;
         }
     </script>
 </body>
