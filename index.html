@@ -2,41 +2,67 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>AutoService Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoService Pro | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+
+    <meta name="google-site-verification" content="AaxmBo_c3S7DS0lyOUDRw7lXpCzN8xOKzYd1cuJuN6k" />
 
     <script>
         !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".js","")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_util_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify启用子域".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-        posthog.init('phx_32fBXedzuSuvovAkpRzqLe7RWid4LqbK3rs4gucQv7r4zAjC8', { api_host: 'https://us.posthog.com' })
+        posthog.init('phc_AoCGeuiW9ByfSkhvyntgKayRN83oU5tFvanEkVpGzN4z', { api_host: 'https://app.posthog.com' });
     </script>
 
-    <script src="https://js.sentry-cdn.com/0a62e48e45194e0cd135a84cd7161226.min.js" crossorigin="anonymous"></script>
+    <script src="https://browser.sentry-cdn.com/7.100.0/bundle.min.js"></script>
+    <script>Sentry.init({dsn: "https://0a62e48e45194e0cd135a84cd7161226@o4511416310104064.ingest.de.sentry.io/4511416317444176"});</script>
 </head>
-<body class="bg-slate-50 p-6">
-    <div class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow-sm border">
-        <h1 class="text-xl font-bold mb-4">AutoService Pro</h1>
-        <input id="task" class="w-full border p-2 mb-2 rounded" placeholder="Завдання">
-        <input id="mile" class="w-full border p-2 mb-2 rounded" placeholder="Пробіг">
-        <button id="btn" class="w-full bg-blue-600 text-white py-2 rounded font-bold">Додати запис</button>
-        <div id="list" class="mt-4"></div>
+<body class="bg-slate-900 min-h-screen text-slate-100 flex items-center justify-center p-6">
+
+    <div class="max-w-md w-full bg-slate-800 rounded-3xl p-8 border border-slate-700 shadow-2xl">
+        <div class="mb-8">
+            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">AutoService Pro</h1>
+            <p class="text-slate-400 text-sm">Трекер обслуговування вашого авто</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Назва послуги</label>
+                <input id="task" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Наприклад: Заміна мастила">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Пробіг (км)</label>
+                <input id="mile" type="number" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Введіть км">
+            </div>
+            <button id="btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                Додати запис
+            </button>
+        </div>
+
+        <div id="list" class="mt-8 space-y-3">
+            <h2 class="text-xs font-bold text-slate-500 uppercase">Останні записи</h2>
+            </div>
     </div>
 
     <script>
-        document.getElementById('btn').addEventListener('click', function() {
+        document.getElementById('btn').addEventListener('click', () => {
             const task = document.getElementById('task').value;
             const mile = document.getElementById('mile').value;
 
             if (!task || !mile) {
                 if (window.Sentry) Sentry.captureException(new Error("Порожні поля"));
-                alert("Заповніть поля!");
-                return;
+                return alert("Заповніть всі поля!");
             }
 
-            if (window.posthog) {
-                posthog.capture('record_added', { task, mile });
-            }
+            if (window.posthog) posthog.capture('record_added', { task, mile });
 
-            document.getElementById('list').innerHTML += `<div class="p-2 border-b">${task}</div>`;
+            const list = document.getElementById('list');
+            const card = document.createElement('div');
+            card.className = "bg-slate-900 border border-slate-700 p-4 rounded-xl flex justify-between items-center animate-in fade-in zoom-in duration-300";
+            card.innerHTML = `<div><p class="font-bold text-sm">${task}</p><p class="text-[10px] text-blue-400 font-mono">${mile} KM</p></div><span class="text-[10px] bg-blue-900 text-blue-300 px-2 py-1 rounded-lg font-bold">ОК</span>`;
+            list.prepend(card);
+
             document.getElementById('task').value = '';
             document.getElementById('mile').value = '';
         });
